@@ -25,21 +25,30 @@ export class CanvasDrawer {
     startY: number,
     endX: number,
     endY: number,
-    rounded?: boolean
+    camera: { x: number, y: number, zoom: number },
+    rounded?: boolean,
   ) {
     const height = endY - startY;
     const width = endX - startX;
 
     this.ctx.strokeStyle = "white";
+    this.ctx.save();
+    this.ctx.translate(camera.x, camera.y);
+    this.ctx.scale(camera.zoom, camera.zoom);
     if (rounded) {
       this.ctx.roundRect(startX, startY, width, height, 5 * Math.PI);
       this.ctx.stroke();
+
     }
-    this.ctx.strokeRect(startX, startY, width, height);
+    else {
+      this.ctx.strokeRect(startX, startY, width, height);
+    }
+
+
   }
 
   CreateCircle(startX: number, startY: number, endX: number, endY: number) {
-    const height = endY - startY;
+    const height = startY - endY;
     this.ctx.arc(startX, startY, Math.abs(height), 0, 2 * Math.PI);
     this.ctx.stroke();
   }
