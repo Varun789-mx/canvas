@@ -11,12 +11,16 @@ export class CanvasDrawer {
   }
 
   private init() {
-    this.canvas.width = window.innerWidth;
-    this.canvas.height = window.innerHeight;
+    this.canvas.width = window.innerWidth * 2;
+    this.canvas.height = window.innerHeight * 2;
+    this.canvas.style.width = `${window.innerWidth}px`;
+    this.canvas.style.height = `${window.innerHeight}px`;
     this.ctx.strokeStyle = "white";
-    this.ctx.lineWidth = 1;
+    this.ctx.lineWidth = 5;
+    this.ctx.scale(2, 2);
+    this.ctx.lineCap = "round";
+    this.ctx.lineJoin = "round";
   }
-
   clear() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
@@ -25,8 +29,8 @@ export class CanvasDrawer {
     startY: number,
     endX: number,
     endY: number,
-    camera: { x: number, y: number, zoom: number },
-    rounded?: boolean,
+    camera: { x: number; y: number; zoom: number },
+    rounded?: boolean
   ) {
     const height = endY - startY;
     const width = endX - startX;
@@ -38,13 +42,9 @@ export class CanvasDrawer {
     if (rounded) {
       this.ctx.roundRect(startX, startY, width, height, 5 * Math.PI);
       this.ctx.stroke();
-
-    }
-    else {
+    } else {
       this.ctx.strokeRect(startX, startY, width, height);
     }
-
-
   }
 
   CreateCircle(startX: number, startY: number, endX: number, endY: number) {
@@ -57,5 +57,22 @@ export class CanvasDrawer {
     this.ctx.moveTo(startX, startY);
     this.ctx.lineTo(endX, endY);
     this.ctx.stroke();
+  }
+
+  CreateFreehandLine(
+    points: { x: number; y: number }[],
+    camera: { x: number; y: number; zoom: number }
+  ) {
+    if (points.length < 2) return;
+    this.ctx.save();
+    this.ctx.translate(camera.x, camera.y);
+    this.ctx.scale(camera.zoom, camera.zoom);
+    this.ctx.beginPath();
+    this.ctx.moveTo(points[0].x, points[0].y);
+    for (let i = 0; i < points.length; i++) {
+      this.ctx.lineTo(points[i].x, points[i].y);
+    }
+    this.ctx.stroke();
+    this.ctx.reset();
   }
 }
