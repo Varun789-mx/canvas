@@ -16,12 +16,10 @@ function Directory({ FileStructure }: { FileStructure: FileStructureType }) {
 
     return (
         <div className="w-full">
-             <div>Explorer</div>
             <div
                 className="flex items-center gap-1 px-2 py-1 hover:bg-gray-700/50 cursor-pointer text-gray-200 text-sm"
                 onClick={() => setExpanded(!Expanded)}
             >
-               
                 {Expanded ? (
                     <ChevronDown size={16} className="shrink-0" />
                 ) : (
