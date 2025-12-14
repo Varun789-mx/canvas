@@ -59,9 +59,19 @@ export function CodeEditor() {
       },
     ],
   };
+  
   useEffect(() => {
     setfileStructure(testFileStructure);
   }, [])
+   function SelectFile(filename: string) {
+        console.log("Selected File: ", fileStructure);
+        if (fileStructure.type === FileType.folder)
+            fileStructure.items.map((item) => {
+                if (item.type === FileType.file && item.name === filename) {
+                    console.log("File Content: ", item.content);
+                }
+            })
+    }
 
   // function receiveRemoteChange(changeData: CodeChangeType & { length?: number }) {
   //   CodeChanges(EditorRef, MonacoRef, changeData, true);

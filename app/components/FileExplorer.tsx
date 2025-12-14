@@ -2,7 +2,8 @@ import { useState } from "react";
 import { FileStructureType, FileType } from "../lib/Types";
 import { ChevronDown, ChevronRight, File, Folder } from "lucide-react";
 
-function Directory({ FileStructure }: { FileStructure: FileStructureType }) {
+function Directory({ FileStructure }: { FileStructure: FileStructureType }, FileSelect: void) {
+
     const [Expanded, setExpanded] = useState(true);
 
     if (FileStructure.type === FileType.file) {
