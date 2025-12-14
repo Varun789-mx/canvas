@@ -13,3 +13,10 @@ export interface FolderNode {
     items: FileStructureType[];
 }
 export type FileStructureType = FolderNode | FileNode;
+
+export interface CodeChangeType {
+    type: 'insert' | 'delete' | 'replace';
+    content: string;
+    position: number;
+    length?: number;
+}

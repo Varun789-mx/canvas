@@ -1,13 +1,18 @@
+"use client"
 import { Editor } from "@monaco-editor/react";
-import { Codestring } from "./file";
-import { useEffect, useState } from "react";
-import { FileType, FileStructureType } from "../lib/Types";
+import { useEffect, useRef, useState } from "react";
+import { FileType, FileStructureType, CodeChangeType } from "../lib/Types";
 import Directory from "./FileExplorer";
 import { Ellipsis, X } from "lucide-react";
-
+// import { CodeChanges, getCodeChanges } from "../lib/CodeChanges";
+import { MonacoBinding } from "y-monaco";
+import * as Y from "yjs";
+import { WebsocketProvider } from "y-websocket";
 
 
 export function CodeEditor() {
+  const EditorRef = useRef<any>(null);
+  const MonacoRef = useRef<any>(null)
   const [fileStructure, setfileStructure] = useState<FileStructureType>({
     name: "root",
     type: FileType.folder,
@@ -58,13 +63,60 @@ export function CodeEditor() {
     setfileStructure(testFileStructure);
   }, [])
 
+  // function receiveRemoteChange(changeData: CodeChangeType & { length?: number }) {
+  //   CodeChanges(EditorRef, MonacoRef, changeData, true);
+  // }
+
+  // function testCodeChanges() {
+  //   CodeChanges(EditorRef, MonacoRef,
+  //     {
+  //       "type": "replace",
+  //       "content": "o",
+  //       "position": 224,
+  //     }, true);
+  // }
+
+  // setTimeout(() => {
+  //   testCodeChanges();
+  // }, 5 * 1000);
 
 
+  // function handleEditorChange(value: string | undefined, event: any) {
 
+  //   if (!event || !event.changes || event.changes.length === 0) return;
+  //   const model = EditorRef.current.getModel();
+
+  //   if (!model) return;
+  //   event.changes.forEach((change: any) => {
+  //     const ChangeData = {
+  //       type: "replace" as const,
+  //       position: change.rangeOffset,
+  //       length: change.rangeLength,
+  //       content: change.text,
+  //     }
+  //     console.log("Editor Detected ", ChangeData);
+  //     const response = getCodeChanges(EditorRef, MonacoRef, ChangeData);
+  //     console.log(response);
+  //   })
+
+
+  // }
+
+  function onEditorMount(editor: any, monaco: any) {
+    EditorRef.current = editor;
+    MonacoRef.current = monaco;
+    if(typeof window === 'undefined') return;
+    const doc = new Y.Doc();
+    const provider = new WebsocketProvider('ws://localhost:1234', 'monaco-demo', doc);
+    const type = doc.getText('monaco');
+    const binding = new MonacoBinding(type, EditorRef.current.getModel(), new Set([EditorRef.current]), provider.awareness);
+    console.log(provider.awareness);
+
+
+  }
   return (
 
     <div className="flex justify-around">
-
       <div className="w-1/4 flex flex-col border-r border-gray-800 h-screen ">
         <div className="w-full flex p-1.5 px-0 border-b justify-around gap-4 text-lg border-r border-gray-900 ">Explorer <Ellipsis /></div> <Directory FileStructure={fileStructure} />
       </div>
@@ -72,18 +124,19 @@ export function CodeEditor() {
         <div className="flex items-center gap-4   bg-gray-800  text-gray-300">
           <div className="border-2 p-2 border-t border-r-0 border-l-0 items-center gap-3 border-b flex  border-emerald-500 bg-black cursor-pointer">Script.js <X className="w-4 h-4" /></div>
         </div>
+
         <Editor
           theme="vs-dark"
           className="text-4xl"
           height="100vh"
           width="100%"
+          // onChange={handleEditorChange}
           defaultLanguage="javascript"
+          onMount={onEditorMount}
           defaultValue="//Here we go again"
-          value={Codestring}
         >
         </Editor>
       </div>
-    </div>
-
+    </div >
   );
 }
