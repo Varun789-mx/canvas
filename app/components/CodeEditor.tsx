@@ -1,6 +1,6 @@
 "use client"
 import { Editor } from "@monaco-editor/react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { FileType, FileStructureType, CodeChangeType } from "../lib/Types";
 import Directory from "./FileExplorer";
 import { Ellipsis, X } from "lucide-react";
@@ -59,19 +59,28 @@ export function CodeEditor() {
       },
     ],
   };
-  
-  useEffect(() => {
-    setfileStructure(testFileStructure);
-  }, [])
-   function SelectFile(filename: string) {
-        console.log("Selected File: ", fileStructure);
-        if (fileStructure.type === FileType.folder)
-            fileStructure.items.map((item) => {
-                if (item.type === FileType.file && item.name === filename) {
-                    console.log("File Content: ", item.content);
-                }
-            })
+
+  const fetchfiles = async () => {
+    const response = await fetch('http://localhost:4000/download?path=reactbase');
+    if (!response.ok) {
+      console.log("Error getting the files");
     }
+    const data = await response.json();
+    console.log(data, "Files");
+    setfileStructure(data.files.files);
+  }
+  useEffect(() => {
+    fetchfiles();
+  }, [])
+  function SelectFile(filename: string) {
+    console.log("Selected File: ", fileStructure);
+    if (fileStructure.type === FileType.folder)
+      fileStructure.items.map((item) => {
+        if (item.type === FileType.file && item.name === filename) {
+          console.log("File Content: ", item.content);
+        }
+      })
+  }
 
   // function receiveRemoteChange(changeData: CodeChangeType & { length?: number }) {
   //   CodeChanges(EditorRef, MonacoRef, changeData, true);
@@ -115,7 +124,7 @@ export function CodeEditor() {
   function onEditorMount(editor: any, monaco: any) {
     EditorRef.current = editor;
     MonacoRef.current = monaco;
-    if(typeof window === 'undefined') return;
+    if (typeof window === 'undefined') return;
     const doc = new Y.Doc();
     const provider = new WebsocketProvider('ws://localhost:1234', 'monaco-demo', doc);
     const type = doc.getText('monaco');
